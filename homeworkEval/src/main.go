@@ -8,7 +8,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	solutionsRootFolder := getEnv("SOLUTIONS_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8")
-	fileName := getEnv("STUDENTS_FILE", "../all-students.csv")
+	fileName := getEnv("STUDENTS_FILE", "../test-students.csv")
 	testsRootFolder := getEnv("TEST_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/tests")
 	homeWorkNumTasks := 5
 	students := parseStudentsInfo(fileName)

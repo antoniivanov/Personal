@@ -6,21 +6,18 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 )
 
 // Student is a student
 type Student struct {
 	FacultyNumber string
-	FirstName     string
-	SecondName    string
-	FamilyName    string
+	Name          string
 	Group         string
 }
 
 // FullName returns all names
 func (student Student) FullName() string {
-	return student.FirstName + " " + student.SecondName + " " + student.FamilyName
+	return student.Name
 }
 
 func parseStudentsInfo(fileName string) []Student {
@@ -37,13 +34,11 @@ func parseStudentsInfo(fileName string) []Student {
 			log.Fatalf("Cannot read the file %s", fileName)
 		}
 		student := Student{FacultyNumber: line[0]}
-		names := strings.Split(line[1], " ")
-		student.FirstName = names[0]
-		student.SecondName = names[1]
-		student.FamilyName = names[2]
-		if len(names) > 5 {
-			student.Group = names[5]
+		student.Name = line[0]
+		if len(line) > 5 {
+			student.Group = line[5]
 		}
+
 		people = append(people, student)
 	}
 	return people

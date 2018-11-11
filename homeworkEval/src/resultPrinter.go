@@ -16,11 +16,11 @@ import (
 func printCsvHeader(w *bufio.Writer, numTasks int) {
 
 	sb := strings.Builder{}
-	sb.WriteString("FN,Name,Group") // група
+	sb.WriteString("FN,Name,Group,") // група
 	for i := 1; i <= numTasks; i++ {
-		sb.WriteString(fmt.Sprintf("Task%[1]d,%[1]d Results,%[1]d Passed,%[1]d TestCount,%[1]d Ratio,", i))
+		sb.WriteString(fmt.Sprintf("Task%[1]d,%[1]d Results,%[1]d Passed,%[1]d TestCount,%[1]d Score,", i))
 	}
-	sb.WriteString("TotalRatio")
+	sb.WriteString("TotalScore")
 	fmt.Fprintln(w, sb.String())
 }
 
@@ -47,7 +47,7 @@ func printToCsv(resultFolder string, studentHws []*StudentHomeWork, numTasks int
 		sb.WriteString(",")
 		sb.WriteString(shw.student.Group)
 		sb.WriteString(",")
-		var totalRatio float64
+		var totalScore float64
 		for i := 1; i <= numTasks; i++ {
 			hwSol := shw.homeWorkSolutions[i]
 			sb.WriteString(strconv.Itoa(i))
@@ -64,17 +64,17 @@ func printToCsv(resultFolder string, studentHws []*StudentHomeWork, numTasks int
 			sb.WriteString(",")
 			sb.WriteString(strconv.Itoa(len(hwSol.TestResults)))
 			sb.WriteString(",")
-			var ratio float64
+			var score float64
 			if len(hwSol.TestResults) > 0 {
-				ratio = float64(passed) / float64(len(hwSol.TestResults))
+				score = float64(passed) / float64(len(hwSol.TestResults))
 			}
-			sb.WriteString(strconv.FormatFloat(ratio, 'f', 3, 64))
+			sb.WriteString(strconv.FormatFloat(score, 'f', 3, 64))
 			sb.WriteString(",")
-			totalRatio += ratio
+			totalScore += score
 
 			funk.ForEach(hwSol.TestLogs, func(s string) { logsBuilder.WriteString(s) })
 		}
-		sb.WriteString(strconv.FormatFloat(totalRatio, 'f', 3, 64))
+		sb.WriteString(strconv.FormatFloat(totalScore, 'f', 3, 64))
 		fmt.Fprintln(w, sb.String())
 
 		errorsFile := filepath.Join(resultFolder, shw.student.FacultyNumber+".errors.txt")
