@@ -2,13 +2,14 @@ package main
 
 import (
 	"log"
+	"sync"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	solutionsRootFolder := getEnv("SOLUTIONS_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8")
-	fileName := getEnv("STUDENTS_FILE", "../test-students.csv")
+	fileName := getEnv("STUDENTS_FILE", "../all-students.csv")
 	testsRootFolder := getEnv("TEST_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/tests")
 	homeWorkNumTasks := 5
 	students := parseStudentsInfo(fileName)
@@ -17,9 +18,19 @@ func main() {
 
 	studentsHomework := mapToStudentHomework(students, homeWorkNumTasks, solutionsRootFolder)
 
+	maxGoroutines := 10
+	guard := make(chan struct{}, maxGoroutines)
+	var wg sync.WaitGroup
 	for _, shw := range studentsHomework {
-		checkStudentHomework(shw, testsRootFolder)
+		guard <- struct{}{} // would block if guard channel is already filled
+		wg.Add(1)
+		go func(shw *StudentHomeWork) {
+			defer wg.Done()
+			checkStudentHomework(shw, testsRootFolder)
+			<-guard
+		}(shw)
 	}
+	wg.Wait()
 	log.Println("Generate csvFile with results")
 	//funk.ForEach(studentsHomework, func(shw *StudentHomeWork) { log.Printf("%+v", *shw) })
 	printToCsv("../result", studentsHomework, homeWorkNumTasks)

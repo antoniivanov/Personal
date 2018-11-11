@@ -34,7 +34,7 @@ func parseStudentsInfo(fileName string) []Student {
 			log.Fatalf("Cannot read the file %s", fileName)
 		}
 		student := Student{FacultyNumber: line[0]}
-		student.Name = line[0]
+		student.Name = line[1]
 		if len(line) > 5 {
 			student.Group = line[5]
 		}

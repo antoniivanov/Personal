@@ -38,6 +38,29 @@ func normalizeAnswer(ans string) string {
 	return ans
 }
 
+func scoreSolution(homeWork *HomeWork, solutionStdout []byte, testInputFile string, answerFile string) {
+	actualAnswer := normalizeAnswer(string(solutionStdout))
+	expectedAnswer := normalizeAnswer(readFileToString(answerFile))
+	if actualAnswer == expectedAnswer {
+		homeWork.TestResults = append(homeWork.TestResults, "OK")
+	} else {
+		// our results are floating point or int numbers ignore any input chars before
+		re := regexp.MustCompile("[-.0-9]*$")
+		newActualAnswer := re.FindString(actualAnswer)
+		if newActualAnswer == expectedAnswer {
+			homeWork.TestResults = append(homeWork.TestResults, "POK") // POSSIBLY_OK
+			msg := fmt.Sprintf("Possibly OK: Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
+			log.Printf("Possibly OK: %s", msg)
+			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.solutionFile, msg))
+		} else {
+			homeWork.TestResults = append(homeWork.TestResults, "WA") // WRONG_ANSWER
+			msg := fmt.Sprintf("Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
+			log.Printf("Result mismatch: %s", msg)
+			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.solutionFile, msg))
+		}
+	}
+}
+
 func runSingleTest(homeWork *HomeWork, testInputFile string, answerFile string, executableSolutionFile string) {
 	testTimeoutSeconds, err := time.ParseDuration(getEnv("TEST_TIMEOUT", "10s"))
 	if err != nil {
@@ -68,26 +91,7 @@ func runSingleTest(homeWork *HomeWork, testInputFile string, answerFile string, 
 		homeWork.TestResults = append(homeWork.TestResults, "RE") // RUNTIME_ERROR
 		homeWork.TestLogs = append(homeWork.TestLogs, formatLog(executableSolutionFile, string(stdout)))
 	} else {
-		actualAnswer := normalizeAnswer(string(stdout))
-		expectedAnswer := normalizeAnswer(readFileToString(answerFile))
-		if actualAnswer == expectedAnswer {
-			homeWork.TestResults = append(homeWork.TestResults, "OK")
-		} else {
-			// our results are floating point or int numbers ignore any input chars before
-			re := regexp.MustCompile("[-.0-9]*$")
-			newActualAnswer := re.FindString(actualAnswer)
-			if newActualAnswer == expectedAnswer {
-				homeWork.TestResults = append(homeWork.TestResults, "POK") // POSSIBLY_OK
-				msg := fmt.Sprintf("Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
-				log.Printf("Possibly OK: %s", msg)
-				homeWork.TestLogs = append(homeWork.TestLogs, formatLog(executableSolutionFile, msg))
-			} else {
-				homeWork.TestResults = append(homeWork.TestResults, "WA") // WRONG_ANSWER
-				msg := fmt.Sprintf("Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
-				log.Printf("Result mismatch: %s", msg)
-				homeWork.TestLogs = append(homeWork.TestLogs, formatLog(executableSolutionFile, msg))
-			}
-		}
+		scoreSolution(homeWork, stdout, testInputFile, answerFile)
 	}
 }
 
