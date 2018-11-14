@@ -77,8 +77,10 @@ func printToCsv(resultFolder string, studentHws []*StudentHomeWork, numTasks int
 		sb.WriteString(strconv.FormatFloat(totalScore, 'f', 3, 64))
 		fmt.Fprintln(w, sb.String())
 
-		errorsFile := filepath.Join(resultFolder, shw.student.FacultyNumber+".errors.txt")
-		ioutil.WriteFile(errorsFile, []byte(logsBuilder.String()), 0644)
+		if logsBuilder.Len() > 0 {
+			errorsFile := filepath.Join(resultFolder, shw.student.FacultyNumber+".errors.txt")
+			ioutil.WriteFile(errorsFile, []byte(logsBuilder.String()), 0644)
+		}
 
 	}
 	w.Flush()

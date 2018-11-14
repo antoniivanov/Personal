@@ -11,15 +11,19 @@ import (
 	funk "github.com/thoas/go-funk"
 )
 
-// HomeWork stores
+// HomeWork stores information about the solution and score of a Homework task
 type HomeWork struct {
-	Index        int
-	TestResults  []string
-	TestLogs     []string
+	// Home work task index (or number)
+	Index int
+	// Results for each task (See testRunner.go for possible values)
+	TestResults []string
+	// logs for errors in task
+	TestLogs []string
+	// the solution file of the homework
 	solutionFile string
 }
 
-// StudentHomeWork contains info about the homework tasks
+// StudentHomeWork contains info about the homework tasks of a given student.
 type StudentHomeWork struct {
 	student           *Student
 	homeWorkSolutions map[int]*HomeWork

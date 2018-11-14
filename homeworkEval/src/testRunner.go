@@ -17,6 +17,14 @@ import (
 
 func compileSolution(solutionFile string, outputFile string) ([]byte, error) {
 
+	// add some commnonly added by mistake headers by beginners
+	solutionDir := filepath.Dir(solutionFile)
+	f, _ := os.Create(filepath.Join(solutionDir, "pch.h"))
+	f.Close()
+
+	f, _ = os.Create(filepath.Join(solutionDir, "stdafx.h"))
+	f.Close()
+
 	// g++ -o "$EXE" $CPPOPTS "$SRC"
 	cmd := exec.Command("g++", "-o", outputFile, solutionFile)
 	stdout, err := cmd.CombinedOutput()
@@ -28,11 +36,18 @@ func compileSolution(solutionFile string, outputFile string) ([]byte, error) {
 	return nil, nil
 }
 
-func formatLog(executableSolutionFile string, message string) string {
-	return fmt.Sprintf("\n\nERROR IN  %s\n%s\n", filepath.Base(executableSolutionFile), message)
+func formatLog(taskIndex int, message string) string {
+	return fmt.Sprintf("\n\nERROR IN TASK %d\n%s\n", taskIndex, message)
 }
 
 func normalizeAnswer(ans string) string {
+	// we will treat new lines as spaces
+	re := regexp.MustCompile("\r?\n")
+	ans = re.ReplaceAllString(ans, " ")
+	// remove double spaces
+	re = regexp.MustCompile(" +")
+	ans = re.ReplaceAllString(ans, " ")
+
 	trimedChars := "\n\t "
 	ans = strings.Trim(ans, trimedChars)
 	return ans
@@ -45,18 +60,18 @@ func scoreSolution(homeWork *HomeWork, solutionStdout []byte, testInputFile stri
 		homeWork.TestResults = append(homeWork.TestResults, "OK")
 	} else {
 		// our results are floating point or int numbers ignore any input chars before
-		re := regexp.MustCompile("[-.0-9]*$")
-		newActualAnswer := re.FindString(actualAnswer)
+		re := regexp.MustCompile("[ -.0-9]*$")
+		newActualAnswer := strings.Trim(re.FindString(actualAnswer), " ")
 		if newActualAnswer == expectedAnswer {
 			homeWork.TestResults = append(homeWork.TestResults, "POK") // POSSIBLY_OK
 			msg := fmt.Sprintf("Possibly OK: Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
 			log.Printf("Possibly OK: %s", msg)
-			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.solutionFile, msg))
+			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.Index, msg))
 		} else {
 			homeWork.TestResults = append(homeWork.TestResults, "WA") // WRONG_ANSWER
 			msg := fmt.Sprintf("Input :%s, Actual: %s ; Expected: %s", readFileToString(testInputFile), actualAnswer, expectedAnswer)
 			log.Printf("Result mismatch: %s", msg)
-			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.solutionFile, msg))
+			homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.Index, msg))
 		}
 	}
 }
@@ -89,7 +104,7 @@ func runSingleTest(homeWork *HomeWork, testInputFile string, answerFile string, 
 	if err != nil {
 		log.Println(stdout, err)
 		homeWork.TestResults = append(homeWork.TestResults, "RE") // RUNTIME_ERROR
-		homeWork.TestLogs = append(homeWork.TestLogs, formatLog(executableSolutionFile, string(stdout)))
+		homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.Index, string(stdout)))
 	} else {
 		scoreSolution(homeWork, stdout, testInputFile, answerFile)
 	}
@@ -130,7 +145,7 @@ func checkStudentHomework(studentsHw *StudentHomeWork, testsRootFolder string) {
 				runTests(hw, taskTestFolder, outputFile)
 			} else {
 				hw.TestResults = append(hw.TestResults, "CE") // COMPILE_ERROR
-				hw.TestLogs = append(hw.TestLogs, formatLog(hw.solutionFile, string(stdout)))
+				hw.TestLogs = append(hw.TestLogs, formatLog(hw.Index, string(stdout)))
 			}
 		} else {
 			hw.TestResults = []string{"NA"} // NOT_AVAILABLE

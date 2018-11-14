@@ -8,9 +8,9 @@ import (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	solutionsRootFolder := getEnv("SOLUTIONS_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8")
+	solutionsRootFolder := getEnv("SOLUTIONS_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/hw-1-solutions")
 	fileName := getEnv("STUDENTS_FILE", "../all-students.csv")
-	testsRootFolder := getEnv("TEST_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/tests")
+	testsRootFolder := getEnv("TEST_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/hw-1-solutions/tests")
 	homeWorkNumTasks := 5
 	students := parseStudentsInfo(fileName)
 
@@ -18,7 +18,7 @@ func main() {
 
 	studentsHomework := mapToStudentHomework(students, homeWorkNumTasks, solutionsRootFolder)
 
-	maxGoroutines := 10
+	maxGoroutines := 15
 	guard := make(chan struct{}, maxGoroutines)
 	var wg sync.WaitGroup
 	for _, shw := range studentsHomework {
