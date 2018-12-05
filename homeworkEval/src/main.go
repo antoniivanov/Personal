@@ -5,9 +5,7 @@ import (
 	"sync"
 )
 
-func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
+func startGradingStudents() {
 	solutionsRootFolder := getEnv("SOLUTIONS_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/hw-1-solutions")
 	fileName := getEnv("STUDENTS_FILE", "../all-students.csv")
 	testsRootFolder := getEnv("TEST_DIR", "/Users/aivanov/Google Drive/FMI/up-2018-kn-8/hw-1-solutions/tests")
@@ -18,7 +16,7 @@ func main() {
 
 	studentsHomework := mapToStudentHomework(students, homeWorkNumTasks, solutionsRootFolder)
 
-	maxGoroutines := 15
+	maxGoroutines := 10
 	guard := make(chan struct{}, maxGoroutines)
 	var wg sync.WaitGroup
 	for _, shw := range studentsHomework {
@@ -35,4 +33,10 @@ func main() {
 	//funk.ForEach(studentsHomework, func(shw *StudentHomeWork) { log.Printf("%+v", *shw) })
 	printToCsv("../result", studentsHomework, homeWorkNumTasks)
 	log.Println("The End.")
+}
+
+func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	startGradingStudents()
 }

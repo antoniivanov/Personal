@@ -41,7 +41,7 @@ func formatLog(taskIndex int, message string) string {
 }
 
 func normalizeAnswer(ans string) string {
-	// we will treat new lines as spaces
+	// // we will treat new lines as spaces
 	re := regexp.MustCompile("\r?\n")
 	ans = re.ReplaceAllString(ans, " ")
 	// remove double spaces
@@ -60,7 +60,7 @@ func scoreSolution(homeWork *HomeWork, solutionStdout []byte, testInputFile stri
 		homeWork.TestResults = append(homeWork.TestResults, "OK")
 	} else {
 		// our results are floating point or int numbers ignore any input chars before
-		re := regexp.MustCompile("[ -.0-9]*$")
+		re := regexp.MustCompile("[\n-.0-9]*$")
 		newActualAnswer := strings.Trim(re.FindString(actualAnswer), " ")
 		if newActualAnswer == expectedAnswer {
 			homeWork.TestResults = append(homeWork.TestResults, "POK") // POSSIBLY_OK
@@ -98,6 +98,8 @@ func runSingleTest(homeWork *HomeWork, testInputFile string, answerFile string, 
 	if ctx.Err() == context.DeadlineExceeded {
 		//log.Println("Timed out")
 		homeWork.TestResults = append(homeWork.TestResults, "TO") // TIME_OUT
+		msg := "With input: " + readFileToString(testInputFile) + " timed out."
+		homeWork.TestLogs = append(homeWork.TestLogs, formatLog(homeWork.Index, msg))
 		return
 	}
 

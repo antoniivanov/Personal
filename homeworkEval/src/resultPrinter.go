@@ -18,7 +18,7 @@ func printCsvHeader(w *bufio.Writer, numTasks int) {
 	sb := strings.Builder{}
 	sb.WriteString("FN,Name,Group,") // група
 	for i := 1; i <= numTasks; i++ {
-		sb.WriteString(fmt.Sprintf("Task%[1]d,%[1]d Results,%[1]d Passed,%[1]d TestCount,%[1]d Score,", i))
+		sb.WriteString(fmt.Sprintf("Task%[1]d,%[1]d Results,%[1]d Passed,%[1]d Test Count,%[1]d Tests Score,", i))
 	}
 	sb.WriteString("TotalScore")
 	fmt.Fprintln(w, sb.String())
