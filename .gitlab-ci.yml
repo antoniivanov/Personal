@@ -4,7 +4,7 @@ image: "python:3.7"
 stages:
   - build
 
-.build:
+build:
   stage: build
   script:
     - echo "Hello!"
